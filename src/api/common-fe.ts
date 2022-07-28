@@ -1,5 +1,5 @@
-import {Application, RequestConfig} from '@hujiang/foe-api'
-import * as middleware from '@hujiang/foe-api/frontend'
+import {Application, RequestConfig} from '@mora/foe-api'
+import * as middleware from '@mora/foe-api/frontend'
 
 /**
  * 默认配置，可以在子 base.ts 文件中修改

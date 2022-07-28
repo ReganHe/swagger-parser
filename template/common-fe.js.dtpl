@@ -1,5 +1,5 @@
-const foeApi = require('@hujiang/foe-api')
-const middleware = require('@hujiang/foe-api/frontend')
+const foeApi = require('@mora/foe-api')
+const middleware = require('@mora/foe-api/frontend')
 
 /**
  * 默认配置，可以在子 base.ts 文件中修改

@@ -108,7 +108,7 @@ export class Operation {
 
     // api 调用
     if (config.language === 'js') {
-      let ns = `@type {import("@hujiang/foe-api").Application.ApiReturnsWithData<import("./modal").${tag}.${id}.O, import("./modal").${tag}.${id}.R, api.FilterMock<import("./modal").${tag}.${id}.R>>}`
+      let ns = `@type {import("@mora/foe-api").Application.ApiReturnsWithData<import("./modal").${tag}.${id}.O, import("./modal").${tag}.${id}.R, api.FilterMock<import("./modal").${tag}.${id}.R>>}`
       doc.push(ns)
       apiRows.push(...doc.toDocLines())
       apiRows.push(`export const ${id} = api(s + '${id}', {${setting}})`)
