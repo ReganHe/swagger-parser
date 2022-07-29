@@ -1,4 +1,4 @@
-import { Application, RequestConfig } from '@hujiang/foe-api';
+import { Application, RequestConfig } from '@mora/foe-api';
 export declare const app: Application;
 export declare namespace api {
     /**

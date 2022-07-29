@@ -1,4 +1,4 @@
-import {Application, RequestConfig} from '@hujiang/foe-api'
+import {Application, RequestConfig} from '@mora/foe-api'
 import {createApplication} from '../common-${type}'
 
 export const app = createApplication('${name}', {
