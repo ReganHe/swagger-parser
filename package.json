@@ -1,6 +1,6 @@
 {
   "name": "@polarwin/swagger-parser",
-  "version": "2.0.1",
+  "version": "3.0.1",
   "publishConfig": {
     "access": "public"
   },
@@ -24,7 +24,8 @@
     "typescript": "3.2.2"
   },
   "dependencies": {
-    "@mora/foe-api":"0.6.0",
+    "@mora/foe-api": "0.6.0",
+    "@serafin/open-api": "^3.0.1",
     "@types/fs-extra": "5.0.4",
     "@types/got": "9.2.2",
     "@types/node": "8.10.38",
@@ -32,7 +33,7 @@
     "got": "9.5.0",
     "mora-common": "1.0.22",
     "mora-scripts": "1.6.35",
-    "yod-mock": "0.3.1",
-    "tslib": "^2.4.0"
+    "tslib": "^2.4.0",
+    "yod-mock": "0.3.1"
   }
 }

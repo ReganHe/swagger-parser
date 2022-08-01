@@ -5,6 +5,7 @@ import * as middleware from '@mora/foe-api/frontend'
  * 默认配置，可以在子 base.ts 文件中修改
  */
 const defaultApplicationOpts: RequestConfig.Init = {
+  disableArgRequireCheck: true,
   debug: __DEV__,
   mock: {
     enabled: false,
@@ -12,7 +13,7 @@ const defaultApplicationOpts: RequestConfig.Init = {
   },
 }
 
-export function createApplication(type: string, opts?: RequestConfig.Init) {
+export function createApplication(type: 'petstore' | 'credit' | 'instal' | 'daybreak', opts?: RequestConfig.Init) {
   opts = {...defaultApplicationOpts, ...opts}
   let app = new Application(opts)
 

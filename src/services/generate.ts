@@ -5,8 +5,8 @@ import {info, clog} from 'mora-scripts/libs/sys'
 
 import * as path from 'path'
 import {FORMAT} from '../config'
-import {parser2} from '../parser2'
-import {swagger2} from '../schema/swagger2'
+import {parser3} from '../parser3'
+import {swagger3} from '../schema/swagger3'
 import {Operation} from '../struct/Operation'
 import {eachObject} from '../util'
 import {getConfig, lookupRootDir, getSwaggerJson, writeFile, parseApiFile, getFile, groupApi2File} from './helper'
@@ -37,13 +37,13 @@ export async function generate(cliOpts: {name?: string[], force?: boolean, mock?
       return
     }
 
-    info(`解析 ${c.name} 项目 ${c.showUpdateLog && userConfig ? JSON.stringify(userConfig) : ''} ...`)
+    info(`解析 ${c.name} 项目 ${c.showUpdateLog && userConfig ? JSON.stringify(userConfig) : ''} ...${JSON.stringify(c)}`)
 
-    const json = await getSwaggerJson<swagger2.Schema>(c)
-    if (!/^2\./.test(json.swagger)) throw new Error(`不支持 swagger 版本：${json.swagger}`)
+    const json = await getSwaggerJson<swagger3.OpenAPIObject>(c)
+    if (!/^3\./.test(json.openapi)) throw new Error(`不支持 swagger 版本：${json.openapi}`)
 
     const {type = 'fe', language = 'ts'} = c
-    const tags = parser2(json, c)
+    const tags = parser3(json, c)
 
     const tpl = (...name: string[]) => path.join(root, 'template', ...name)
     const out = (...name: string[]) => path.resolve(c.outputDir, ...name)
@@ -122,13 +122,13 @@ export async function generate(cliOpts: {name?: string[], force?: boolean, mock?
   })
 }
 
-function eachTags(tags: parser2.Returns.TagsObject, fn: (tagName: string, apiName: string, operation: Operation) => void) {
+function eachTags(tags: parser3.Returns.TagsObject, fn: (tagName: string, apiName: string, operation: Operation) => void) {
   eachObject(tags, (tagName, tagObj) => {
     eachObject(tagObj, (apiName, operation) => fn(tagName, apiName, operation))
   })
 }
 
-function getRenderData(json: swagger2.Schema, tags: parser2.Returns.TagsObject) {
+function getRenderData(json: swagger3.OpenAPIObject, tags: parser3.Returns.TagsObject) {
   let basePath = json.basePath || ''
   let baseMethod = 'POST'
 

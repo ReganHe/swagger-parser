@@ -28,7 +28,7 @@ export namespace Operation {
     /** 如果 path 中有参数，会使用 {} 包裹 */
     path: string
     /** 参数，分不同的地方，可以存在 query/header/path/formData/cookie/body 中 */
-    parameters: ParameterObject[]
+    parameters: ParameterObject[],
     /** 返回的类型 */
     returns: Type
   }
