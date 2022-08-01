@@ -94,6 +94,7 @@ export namespace parser3 {
 export function parser3(schema: swagger3.OpenAPIObject, options: parser3.Options = {}) {
   const tags: parser3.Returns.TagsObject = {}
   const operations: Operation[] = []
+
   // 含有默认值的配置-
   const { normalizeName = true, smartTagName = true } = options
 
@@ -163,19 +164,21 @@ export function parser3(schema: swagger3.OpenAPIObject, options: parser3.Options
           operation.parameters = parseOperationParameters(operationParameters as swagger3.ParameterObject[])
         }
 
-
         // operation.returns
-        let r = operationObject.responses['200'] || operationObject.responses.default
         let returnType = new Type('any')
-        if (r) {
-          r = mergeRef(r as any, schema) as swagger3.ResponseObject
-          if (r.schema) {
-            returnType = getSchemaObjectType(schema, r.schema, options.returnsRequired !== false ? true : undefined)
+        let response = (operationObject.responses['200'] || operationObject.responses.default) as swagger3.ResponseObject;
+        if (response) {
+          if (response.content) {
+            const mediaTypeObject = (response.content['application/json'] || response.content['multipart/form-data'] || response.content['*/*']) as swagger3.MediaTypeObject;
+            const responseObj = mediaTypeObject.schema as swagger3.SchemaObject | swagger3.ReferenceObject;
+            if (responseObj) {
+              returnType = getSchemaObjectType(schema, responseObj, options.returnsRequired !== false ? true : undefined)
+            }
           }
-          returnType.desc.push(r.description)
+          returnType.desc.push(response.description);
         }
-        operation.returns = returnType
 
+        operation.returns = returnType
         tagOperations[apiName] = new Operation(operation)
         operations.push(tagOperations[apiName])
       })
@@ -278,8 +281,8 @@ function parseRequestBody(schema: swagger3.OpenAPIObject, requestBody: swagger3.
   }
   const requestBodyObject = requestBody as swagger3.RequestBodyObject;
   const mediaTypeObject = (requestBodyObject.content['application/json'] || requestBodyObject.content['multipart/form-data']) as swagger3.MediaTypeObject;
-  const requestSchema = mediaTypeObject.schema as swagger3.SchemaObject | swagger3.ReferenceObject;
-  const type = getSchemaObjectType(schema, requestSchema);
+  const requestObj = mediaTypeObject.schema as swagger3.SchemaObject | swagger3.ReferenceObject;
+  const type = getSchemaObjectType(schema, requestObj);
   const found = res.find(r => r.in === 'body')
   const foundObj: Operation.ParameterObject = !found ? { in: 'body', type } : found
   if (found) foundObj.type = type
@@ -299,15 +302,14 @@ function parseRequestBody(schema: swagger3.OpenAPIObject, requestBody: swagger3.
  * @param obj
  * @param defaultRequired 默认是否 required （ 主要针对 response，response 中的对象应该统一 required ）
  */
-function getSchemaObjectType(schema: swagger3.OpenAPIObject, requestSchema: swagger3.SchemaObject | swagger3.ReferenceObject, defaultRequired?: boolean) {
-  const mergedObj = mergeRef(requestSchema as any, schema)
-  // const mergedObj = obj;
+function getSchemaObjectType(schema: swagger3.OpenAPIObject, obj: swagger3.SchemaObject | swagger3.ReferenceObject, defaultRequired?: boolean,   refArrayNames: string[] = []) {
+  const mergedObj = mergeRef(obj as any, schema)
   const { type = 'any', items, required = [] } = mergedObj
   let rtn: Type
   if (type === 'array') {
     if (items) {
       const mergedItems = mergeRef(items, schema)
-      const mergedType = getSchemaObjectType(schema, mergedItems, defaultRequired)
+      const mergedType = getSchemaObjectType(schema, mergedItems, defaultRequired,refArrayNames)
       rtn = new ArrayType(mergedType)
     } else {
       rtn = new ArrayType(new Type('any'))
@@ -316,12 +318,20 @@ function getSchemaObjectType(schema: swagger3.OpenAPIObject, requestSchema: swag
     const defs: Definition[] = []
     rtn = new ObjectType(defs)
     eachObject(mergedObj.properties || {}, (propKey, propValue: any) => {
-      const def = new Definition(propKey, getSchemaObjectType(schema, propValue, defaultRequired))
-      parse2definition(propValue, def)
-      if (typeof defaultRequired === 'boolean') def.required = defaultRequired
-      else def.required = required.includes(propKey)
+      // console.log('propValue', propValue);
+      // console.log('refArrayNames', refArrayNames);
+      if (propValue.type === 'array' && propValue.items && propValue.items['$ref'] && refArrayNames.includes(propValue.items['$ref'])) {
+      } else {
+        if (propValue.type === 'array' && propValue.items && propValue.items['$ref']) {
+          refArrayNames.push(propValue.items['$ref']);
+        }
+        const def = new Definition(propKey, getSchemaObjectType(schema, propValue, defaultRequired,refArrayNames))
+        parse2definition(propValue, def)
+        if (typeof defaultRequired === 'boolean') def.required = defaultRequired
+        else def.required = required.includes(propKey)
 
-      defs.push(def)
+        defs.push(def)
+      }
     })
   } else {
     let typeArr = Array.isArray(type) ? type : [type]
