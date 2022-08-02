@@ -1,27 +1,26 @@
 import * as fs from 'fs-extra'
-import {series} from 'mora-common/util/async'
-import {capCamelCase} from 'mora-common/util/string'
-import {info, clog} from 'mora-scripts/libs/sys'
+import { series } from 'mora-common/util/async'
+import { capCamelCase } from 'mora-common/util/string'
+import { info, clog } from 'mora-scripts/libs/sys'
 
 import * as path from 'path'
-import {FORMAT} from '../config'
-import {parser3} from '../parser3'
-import {swagger3} from '../schema/swagger3'
-import {Operation} from '../struct/Operation'
-import {eachObject} from '../util'
-import {getConfig, lookupRootDir, getSwaggerJson, writeFile, parseApiFile, getFile, groupApi2File} from './helper'
+import { FORMAT } from '../config'
+import { parser3 } from '../parser3'
+import { swagger3 } from '../schema/swagger3'
+import { Operation } from '../struct/Operation'
+import { eachObject } from '../util'
+import { getConfig, lookupRootDir, getSwaggerJson, writeFile, parseApiFile, getFile, groupApi2File } from './helper'
 
-const {TAB, EOL} = FORMAT
+const { TAB, EOL } = FORMAT
 
-export async function generate(cliOpts: {name?: string[], force?: boolean, mock?: boolean, base?: boolean} = {}) {
+export async function generate(cliOpts: { name?: string[], force?: boolean, mock?: boolean, base?: boolean } = {}) {
   const root = lookupRootDir(__dirname)
   const configs = getConfig()
 
   const onlyUpdateMock = cliOpts.mock && !cliOpts.base
-  const onlyUpdateBase = cliOpts.base && !cliOpts.mock
   const userConfigs = (cliOpts.name || []).map(c => {
     let [name, tagName, apiName] = c.split('.')
-    return {name, tagName, apiName}
+    return { name, tagName, apiName }
   })
 
   const matchUserConfigs = (name: string, tagName: string, apiName: string) => {
@@ -42,19 +41,18 @@ export async function generate(cliOpts: {name?: string[], force?: boolean, mock?
     const json = await getSwaggerJson<swagger3.OpenAPIObject>(c)
     if (!/^3\./.test(json.openapi)) throw new Error(`不支持 swagger 版本：${json.openapi}`)
 
-    const {type = 'fe', language = 'ts'} = c
+    const { type = 'fe', language = 'ts' } = c
     const tags = parser3(json, c)
 
     const tpl = (...name: string[]) => path.join(root, 'template', ...name)
     const out = (...name: string[]) => path.resolve(c.outputDir, ...name)
-    const data = {...getRenderData(json, tags), type, name: c.name}
+    const data = { ...getRenderData(json, tags), type, name: c.name }
 
-    renderWhenNotExist(tpl(`common-${type}`), out('..', `common-${type}`), data, language)
     renderWhenNotExist(tpl('base'), out('base'), data, language)
 
     let modal: string[] = [
       '// tslint:disable', // 禁用 tslint
-      `import {api} from './base'`, ''
+      ''
     ]
     let files: string[] = []
     eachObject(tags, (tagName, tagObj) => {
@@ -70,7 +68,7 @@ export async function generate(cliOpts: {name?: string[], force?: boolean, mock?
       let fullFileName = out(fileName + '.' + language)
 
       // 如果存在旧文件，则解析旧文件结构
-      const {api, dp} = parseApiFile(getFile(fullFileName))
+      const { api, dp } = parseApiFile(getFile(fullFileName))
 
       eachObject(tagObj, (apiName, operation) => {
         if (c.showGenerateLog) console.log(`  generate ${tagName}.${apiName} ${operation.opt.path}`)
@@ -84,17 +82,9 @@ export async function generate(cliOpts: {name?: string[], force?: boolean, mock?
             if (c.showUpdateLog) updateLog('Update Base', `${id}`)
             dp.set(
               `${apiName}.base`,
-              {action: 'auto', code: operation.toBase({...data, docPrefix: c.docPrefix, language})
-            })
-          }
-          if (!onlyUpdateBase && (!ref || !ref.mock || ref.mock.action === 'auto' || cliOpts.force)) {
-            if (c.disableMock) {
-              if (c.showUpdateLog) updateLog('Disable Mock', `${id}`)
-              dp.set(`${apiName}.mock`, false)
-            } else {
-              if (c.showUpdateLog) updateLog('Update Mock', `${id}`)
-              dp.set(`${apiName}.mock`, {action: 'auto', code: operation.toMock(c.mock)})
-            }
+              {
+                action: 'auto', code: operation.toBase({ ...data, docPrefix: c.docPrefix, language })
+              })
           }
         }
         dp.set(`${apiName}.exists`, true) // 标识这个 api 存在，否则会被移除
@@ -105,7 +95,7 @@ export async function generate(cliOpts: {name?: string[], force?: boolean, mock?
       // 生成文件
       let s = language === 'js'
         ? `// @ts-check${EOL}import {api} from './base'${EOL}${EOL}const s = '${fileName}.'${EOL}${EOL}`
-        : `import {api} from './base'${EOL}import {${tagName}} from './modal'${EOL}${EOL}const s = '${fileName}.'${EOL}${EOL}`
+        : `import { createRequest } from './base'${EOL}import {${tagName}} from './modal'${EOL}${EOL}const s = '${fileName}.'${EOL}${EOL}`
       writeFile(fullFileName, s + groupApi2File(api))
       files.push(fileName + '.' + language)
 
@@ -133,7 +123,7 @@ function getRenderData(json: swagger3.OpenAPIObject, tags: parser3.Returns.TagsO
   let baseMethod = 'POST'
 
   let maxCount = -1
-  let methodCount: {[key: string]: number} = {}
+  let methodCount: { [key: string]: number } = {}
   eachTags(tags, (tagName, apiName, operation) => {
     let method = operation.opt.method
     if (!methodCount[method]) {
@@ -150,7 +140,7 @@ function getRenderData(json: swagger3.OpenAPIObject, tags: parser3.Returns.TagsO
     }
   })
 
-  return {basePath, baseMethod}
+  return { basePath, baseMethod }
 }
 
 function renderWhenNotExist(fromFile: string, toFile: string, data: any, language = 'ts') {
