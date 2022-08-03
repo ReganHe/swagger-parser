@@ -117,18 +117,16 @@ export class Operation {
     }
 
     // api 调用
-    let nsOpt = hasOptions ? ` export type O = ${tag}.${id}.O;` : ''
-    let ns = `export namespace ${id} {${nsOpt} export type R = ${tag}.${id}.R }`
-    apiRows.push(ns, ...doc.toDocLines())
+    apiRows.push(...doc.toDocLines())
     if (hasOptions) {
       if (inParamName === 'params') {
-        apiRows.push(`export const ${id} = createRequest<${id}.O, ${id}.R>(s + '${id}', ({ ${pathParameterNames.length > 0 ? pathParameterNames.join(', ') + ', ' : ''}...params}) => ({${setting} }))`)
+        apiRows.push(`export const ${id} = createRequest<${tag}.${id}.Options, ${tag}.${id}.Returns['data']>(s + '${id}', ({ ${pathParameterNames.length > 0 ? pathParameterNames.join(', ') + ', ' : ''}...params}) => ({${setting} }))`)
       } else {
-        apiRows.push(`export const ${id} = createRequest<${id}.O, ${id}.R>(s + '${id}', (${inParamName}) => ({${setting} }))`)
+        apiRows.push(`export const ${id} = createRequest<${tag}.${id}.Options, ${tag}.${id}.Returns['data']>(s + '${id}', (${inParamName}) => ({${setting} }))`)
       }
 
     } else {
-      apiRows.push(`export const ${id} = createRequest<undefined, ${id}.R>(s + '${id}', () => ({${setting} }))`)
+      apiRows.push(`export const ${id} = createRequest<undefined, ${tag}.${id}.Returns['data']>(s + '${id}', () => ({${setting} }))`)
     }
 
     return apiRows.join(EOL)
