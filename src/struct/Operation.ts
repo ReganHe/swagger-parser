@@ -93,7 +93,6 @@ export class Operation {
 
     const pathParameterNames: string[] = [];
     if (parameters.some(p => p.in === 'path')) {
-      console.log('path parameters', JSON.stringify(parameters));
       parameters.filter(r => r.in === 'path').forEach(r => {
         ((r.type as any).definitions || []).forEach((t: { name: string }) => {
           if (t.name) {
@@ -104,7 +103,6 @@ export class Operation {
         })
       })
     }
-    console.log('pathParameterNames', pathParameterNames);
 
     const setting = settingRows.join(', ')
     const apiRows: string[] = []
