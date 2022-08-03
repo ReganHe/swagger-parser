@@ -222,9 +222,17 @@ export function parser3(schema: swagger3.OpenAPIObject, options: parser3.Options
 
 function parseOperationDesc(operationObject: swagger3.OperationObject) {
   let desc = new Desc()
-  desc.push(operationObject.summary)
-  desc.push(operationObject.description)
-  desc.deprecated(operationObject.deprecated)
+  if (operationObject.summary) {
+    desc.push(operationObject.summary)
+  }
+
+  if (operationObject.description) {
+    desc.push(operationObject.description)
+  }
+
+  if (operationObject.deprecated) {
+    desc.deprecated(operationObject.deprecated)
+  }
 
   let { externalDocs } = operationObject
   if (externalDocs) desc.push(`${externalDocs.description || 'external docs'} @see ${externalDocs.url}`)

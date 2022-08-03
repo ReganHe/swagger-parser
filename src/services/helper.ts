@@ -121,9 +121,9 @@ export function groupApi2File(api: ApiFileStruct) {
 
     // 只有存在的 或者是手动维护的 api 才保留，其它的不继续保存在文件中
     if (base && (exists || base.action === 'manual')) {
-      rows.push(`//#region ${id}--base ${base.action ? base.action : DEFAULT_ACTION.base}`)
+      // rows.push(`//#region ${id}--base ${base.action ? base.action : DEFAULT_ACTION.base}`)
       rows.push(base.code)
-      rows.push(`//#endregion ${id}--base`)
+      // rows.push(`//#endregion ${id}--base`)
       // if (mock) rows.push('') // 添加一个空行
       pushed = true
     }

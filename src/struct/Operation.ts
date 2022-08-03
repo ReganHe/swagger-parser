@@ -110,7 +110,7 @@ export class Operation {
     let { opt } = this
     let doc = new Desc()
     doc.push(desc)
-    doc.push(`${EOL}**TAG:** ${opt.rawTag}； &nbsp;&nbsp; **PATH:** ${opt.path}；`)
+    doc.push(`**TAG:** ${opt.rawTag}； &nbsp;&nbsp; **PATH:** ${opt.path}；`)
 
     if (config.docPrefix) {
       doc.push(`@see [线上文档](${config.docPrefix}/${this.opt.rawTag}/${this.opt.rawId})`)
