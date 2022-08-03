@@ -81,7 +81,7 @@ export class Operation {
     const hasOptions = parameters.length
 
     // 获取配置
-    const settingRows = [`url: '${path.replace(/{(\w+)}/g, ':$1')}'`]
+    const settingRows = [`url: \`${path.replace(/{(\w+)}/g, '${$1}')}\``]
     settingRows.push(`method: '${method}'`)
     if (parameters.find(p => p.in === 'formData')) {
       settingRows.push(`headers: {'Content-Type': 'application/x-www-form-urlencoded'}`)
@@ -91,6 +91,20 @@ export class Operation {
       settingRows.push(inParamName)
     }
 
+    const pathParameterNames: string[] = [];
+    if (parameters.some(p => p.in === 'path')) {
+      console.log('path parameters', JSON.stringify(parameters));
+      parameters.filter(r => r.in === 'path').forEach(r => {
+        ((r.type as any).definitions || []).forEach((t: { name: string }) => {
+          if (t.name) {
+            if (!pathParameterNames.includes(t.name)) {
+              pathParameterNames.push(t.name);
+            }
+          }
+        })
+      })
+    }
+    console.log('pathParameterNames', pathParameterNames);
 
     const setting = settingRows.join(', ')
     const apiRows: string[] = []
@@ -109,9 +123,14 @@ export class Operation {
     let ns = `export namespace ${id} {${nsOpt} export type R = ${tag}.${id}.R }`
     apiRows.push(ns, ...doc.toDocLines())
     if (hasOptions) {
-      apiRows.push(`export const ${id} = createRequest<${id}.O, ${id}.R>(s + '${id}', (${inParamName}) => ({${setting}}))`)
+      if (inParamName === 'params') {
+        apiRows.push(`export const ${id} = createRequest<${id}.O, ${id}.R>(s + '${id}', ({ ${pathParameterNames.length > 0 ? pathParameterNames.join(', ') + ', ' : ''}...params}) => ({${setting} }))`)
+      } else {
+        apiRows.push(`export const ${id} = createRequest<${id}.O, ${id}.R>(s + '${id}', (${inParamName}) => ({${setting} }))`)
+      }
+
     } else {
-      apiRows.push(`export const ${id} = createRequest<undefined, ${id}.R>(s + '${id}', () => ({${setting}}))`)
+      apiRows.push(`export const ${id} = createRequest<undefined, ${id}.R>(s + '${id}', () => ({${setting} }))`)
     }
 
     return apiRows.join(EOL)
