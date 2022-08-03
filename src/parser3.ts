@@ -145,6 +145,8 @@ export function parser3(schema: swagger3.OpenAPIObject, options: parser3.Options
           if (!newname) return
           if (typeof newname === 'string') apiName = newname
         }
+
+        apiName = apiName.replace(/_\d+$/, `_${tagName}`)
         apiName = camelCase(apiName)
 
         let tagOperations = getObjectValue(tags, tagName)
@@ -302,14 +304,14 @@ function parseRequestBody(schema: swagger3.OpenAPIObject, requestBody: swagger3.
  * @param obj
  * @param defaultRequired 默认是否 required （ 主要针对 response，response 中的对象应该统一 required ）
  */
-function getSchemaObjectType(schema: swagger3.OpenAPIObject, obj: swagger3.SchemaObject | swagger3.ReferenceObject, defaultRequired?: boolean,   refArrayNames: string[] = []) {
+function getSchemaObjectType(schema: swagger3.OpenAPIObject, obj: swagger3.SchemaObject | swagger3.ReferenceObject, defaultRequired?: boolean, refArrayNames: string[] = []) {
   const mergedObj = mergeRef(obj as any, schema)
   const { type = 'any', items, required = [] } = mergedObj
   let rtn: Type
   if (type === 'array') {
     if (items) {
       const mergedItems = mergeRef(items, schema)
-      const mergedType = getSchemaObjectType(schema, mergedItems, defaultRequired,refArrayNames)
+      const mergedType = getSchemaObjectType(schema, mergedItems, defaultRequired, refArrayNames)
       rtn = new ArrayType(mergedType)
     } else {
       rtn = new ArrayType(new Type('any'))
@@ -325,7 +327,7 @@ function getSchemaObjectType(schema: swagger3.OpenAPIObject, obj: swagger3.Schem
         if (propValue.type === 'array' && propValue.items && propValue.items['$ref']) {
           refArrayNames.push(propValue.items['$ref']);
         }
-        const def = new Definition(propKey, getSchemaObjectType(schema, propValue, defaultRequired,refArrayNames))
+        const def = new Definition(propKey, getSchemaObjectType(schema, propValue, defaultRequired, refArrayNames))
         parse2definition(propValue, def)
         if (typeof defaultRequired === 'boolean') def.required = defaultRequired
         else def.required = required.includes(propKey)
