@@ -162,9 +162,6 @@ function renderWhenNotExist(fromFile: string, toFile: string, data: any, languag
 
   if (language === 'ts') {
     run(fromFile + '.ts.dtpl', toFile + '.ts')
-  } else if (language === 'js') {
-    run(fromFile + '.js.dtpl', toFile + '.js')
-    run(fromFile + '.d.ts.dtpl', toFile + '.d.ts')
   } else {
     throw new Error(`不支持生成语言： "${language}"`)
   }

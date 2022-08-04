@@ -1,6 +1,9 @@
 module.exports = [
   {
-    outputDir: './merchant',
+    name: 'portEnergy',
+    type: 'fe',
+    language: 'ts',
+    outputDir: './auto',
     json: './swagger.json',
     showUpdateLog: true,
     tagNameMap: (name) => {
