@@ -4,8 +4,8 @@ import * as findup from 'mora-scripts/libs/fs/findup'
 import * as DotProp from 'mora-scripts/libs/lang/DotProp'
 
 import * as path from 'path'
-import {FORMAT} from '../config'
-import {ParsedConfig} from './types'
+import { FORMAT } from '../config'
+import { ParsedConfig } from './types'
 
 export function lookupRootDir(fromDir?: string) {
   try {
@@ -64,7 +64,7 @@ function isUrl(str: string) {
  * 实时获取在线的 swagger json
  */
 async function getJsonFromUrl<T = any>(jsonUrl: string): Promise<T> {
-  return (await got(jsonUrl, {json: true})).body
+  return (await got(jsonUrl, { json: true })).body
 }
 
 export function writeFile(filepath: string, data: string | Buffer) {
@@ -82,13 +82,13 @@ export function getFile(filepath: string) {
 
 export interface ApiFileStruct {
   [key: string]: {
-    base?: {action: 'auto' | 'manual', code: string}
-    mock?: {action: 'auto' | 'manual', code: string}
+    base?: { action: 'auto' | 'manual', code: string }
+    mock?: { action: 'auto' | 'manual', code: string }
     exists: boolean
   }
 }
 
-const DEFAULT_ACTION: any = {base: 'manual', mock: 'manual'}
+const DEFAULT_ACTION: any = { base: 'manual', mock: 'manual' }
 /**
  * 解析已经存在的 api 文件的内容
  * @param content
@@ -103,17 +103,17 @@ export function parseApiFile(content: string) {
   content.replace(regexp, (_, id, feature, action, code) => {
     if (!action) action = DEFAULT_ACTION[feature]
     dp.set(`${id}.exists`, false) // 遍历 api 的时候才会将它设置成 true，如果此值一直是 false，则相关 api 会被移除
-    dp.set(`${id}.${feature}`, {action, code: code.trim()})
+    dp.set(`${id}.${feature}`, { action, code: code.trim() })
     return _
   })
 
-  return {api, dp}
+  return { api, dp }
 }
 
 export function groupApi2File(api: ApiFileStruct) {
   const rows: string[] = []
-  Object.keys(api).forEach(id => {
-    let {base, mock, exists} = api[id]
+  Object.keys(api).sort().forEach(id => {
+    let { base, mock, exists } = api[id]
     let pushed = false
 
     // let hasCode = base && exists || mock

@@ -120,13 +120,13 @@ export class Operation {
     apiRows.push(...doc.toDocLines())
     if (hasOptions) {
       if (inParamName === 'params') {
-        apiRows.push(`export const ${id} = createRequest<${tag}.${id}.Options, ${tag}.${id}.Returns['data']>(s + '${id}', ({ ${pathParameterNames.length > 0 ? pathParameterNames.join(', ') + ', ' : ''}...params}) => ({${setting} }))`)
+        apiRows.push(`export const ${id} = base.createRequest<${tag}.${id}.Options, ${tag}.${id}.Returns['data']>(s + '${id}', ({ ${pathParameterNames.length > 0 ? pathParameterNames.join(', ') + ', ' : ''}...params}) => ({${setting} }))`)
       } else {
-        apiRows.push(`export const ${id} = createRequest<${tag}.${id}.Options, ${tag}.${id}.Returns['data']>(s + '${id}', (${inParamName}) => ({${setting} }))`)
+        apiRows.push(`export const ${id} = base.createRequest<${tag}.${id}.Options, ${tag}.${id}.Returns['data']>(s + '${id}', (${inParamName}) => ({${setting} }))`)
       }
 
     } else {
-      apiRows.push(`export const ${id} = createRequest<undefined, ${tag}.${id}.Returns['data']>(s + '${id}', () => ({${setting} }))`)
+      apiRows.push(`export const ${id} = base.createNoParamsRequest<${tag}.${id}.Returns['data']>(s + '${id}', () => ({${setting} }))`)
     }
 
     return apiRows.join(EOL)

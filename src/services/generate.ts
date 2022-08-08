@@ -93,9 +93,7 @@ export async function generate(cliOpts: { name?: string[], force?: boolean, mock
       })
 
       // 生成文件
-      let s = language === 'js'
-        ? `// @ts-check${EOL}import {api} from './base'${EOL}${EOL}const s = '${fileName}.'${EOL}${EOL}`
-        : `import { createRequest } from './base'${EOL}import {${tagName}} from './modal'${EOL}${EOL}const s = '${fileName}.'${EOL}${EOL}`
+      let s = `import * as base from './base'${EOL}import {${tagName}} from './modal'${EOL}${EOL}const s = '${fileName}.'${EOL}${EOL}`
       writeFile(fullFileName, s + groupApi2File(api))
       files.push(fileName + '.' + language)
 
@@ -108,7 +106,7 @@ export async function generate(cliOpts: { name?: string[], force?: boolean, mock
     })
 
     // 生成 modal
-    writeFile(out(`modal${language === 'js' ? '.d' : ''}.ts`), modal.join(EOL) + EOL)
+    writeFile(out(`modal.ts`), modal.join(EOL) + EOL)
   })
 }
 
