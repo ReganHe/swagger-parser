@@ -52,9 +52,9 @@ export async function generate(cliOpts: { name?: string[], force?: boolean, mock
 
     let modal: string[] = [
       '// tslint:disable', // 禁用 tslint
+      '/* eslint-disable */', //禁用 eslint
       ''
     ]
-    let files: string[] = []
     eachObject(tags, (tagName, tagObj) => {
       modal.push(`export namespace ${tagName} {`)
 
@@ -62,11 +62,17 @@ export async function generate(cliOpts: { name?: string[], force?: boolean, mock
       let fileName = capCamelCase('Api ' + tagName)
       if (c.fileNameMap) {
         let tempFileName = c.fileNameMap(fileName)
-        if (!tempFileName) return
-        if (tempFileName && typeof tempFileName === 'string') fileName = tempFileName
-      }
-      let fullFileName = out(fileName + '.' + language)
+        if (!tempFileName) {
+          return
+        }
 
+        if (tempFileName && typeof tempFileName === 'string') {
+          fileName = tempFileName
+        }
+
+      }
+
+      let fullFileName = out(fileName + '.' + language)
       // 如果存在旧文件，则解析旧文件结构
       const { api, dp } = parseApiFile(getFile(fullFileName))
 
@@ -81,7 +87,10 @@ export async function generate(cliOpts: { name?: string[], force?: boolean, mock
         let ref = api[apiName]
         if (matchUserConfigs(c.name, tagName, apiName)) {
           if (!onlyUpdateMock && (!ref || !ref.base || ref.base.action === 'auto' || cliOpts.force)) {
-            if (c.showUpdateLog) updateLog('Update Base', `${c.name}.${tagName}.${apiName}`)
+            if (c.showUpdateLog) {
+              updateLog('Update Base', `${c.name}.${tagName}.${apiName}`)
+            }
+
             dp.set(
               `${apiName}.base`,
               {
@@ -94,17 +103,13 @@ export async function generate(cliOpts: { name?: string[], force?: boolean, mock
         modal.push(`${TAB}}`)
       })
 
-      // 生成文件
-      let s = `import * as base from './base'${EOL}import {${tagName}} from './modal'${EOL}${EOL}const s = '${fileName}.'${EOL}${EOL}`
-      writeFile(fullFileName, s + groupApi2File(api))
-      files.push(fileName + '.' + language)
+      if (matchUserConfigs(c.name, tagName, '')) {
+        // 生成文件
+        let s = `import * as base from './base'${EOL}import {${tagName}} from './modal'${EOL}${EOL}const s = '${fileName}.'${EOL}${EOL}`
+        writeFile(fullFileName, s + groupApi2File(api))
+      }
 
       modal.push(`}`)
-    })
-
-    // 将其它的 Api 开头的文件删除了
-    fs.readdirSync(c.outputDir).forEach(n => {
-      if (n.startsWith('Api') && !files.includes(n)) fs.unlinkSync(path.join(c.outputDir, n))
     })
 
     // 生成 modal

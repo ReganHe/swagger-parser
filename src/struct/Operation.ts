@@ -146,7 +146,7 @@ export class Operation {
       const paramType = this.mergeParameters()
       paramType.toTS('Options', modal)
       // modal.push(`export interface O extends Options {}`)
-      modal.push(`export type O = Options`)
+      modal.push(`export type O = Options;`)
     }
 
     /**
@@ -162,7 +162,7 @@ export class Operation {
     // if (Type.isObjectType(returns)) {
     //   modal.push(`export interface R extends Returns {}`)
     // } else {
-    modal.push(`export type R = Returns['data']`)
+    modal.push(`export type R = Returns['data'];`)
     // }
 
     return modal.join(EOL)
