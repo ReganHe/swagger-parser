@@ -71,15 +71,17 @@ export async function generate(cliOpts: { name?: string[], force?: boolean, mock
       const { api, dp } = parseApiFile(getFile(fullFileName))
 
       eachObject(tagObj, (apiName, operation) => {
-        if (c.showGenerateLog) console.log(`  generate ${tagName}.${apiName} ${operation.opt.path}`)
+        if (c.showGenerateLog) {
+          console.log(`  generate ${tagName}.${apiName} ${operation.opt.path}`)
+        }
+
         modal.push(`${TAB}export namespace ${apiName} {`)
         modal.push(prefix(operation.toModal(), TAB.repeat(2)))
 
         let ref = api[apiName]
-        let id = `${c.name}.${tagName}.${apiName}`
         if (matchUserConfigs(c.name, tagName, apiName)) {
           if (!onlyUpdateMock && (!ref || !ref.base || ref.base.action === 'auto' || cliOpts.force)) {
-            if (c.showUpdateLog) updateLog('Update Base', `${id}`)
+            if (c.showUpdateLog) updateLog('Update Base', `${c.name}.${tagName}.${apiName}`)
             dp.set(
               `${apiName}.base`,
               {
