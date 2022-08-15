@@ -24,6 +24,7 @@ module.exports = [
         安全检测计划表服务: 'Sp',
         安全检测计划文件服务: 'Spf',
         安全检查服务: 'Sc',
+        安全学习培训服务: 'SafetyTraining',
         常规设备服务: 'Device',
         常规物资台帐服务: 'Gsb',
         '厂家/单位服务': 'Mu',
@@ -43,6 +44,7 @@ module.exports = [
         中修计划服务: 'Mrp',
         资质证书管理: 'Certificate',
         字典服务: 'Dict',
+        组织机构管理服务: 'Gisc',
       };
       return TAG_MAP[name];
     },
