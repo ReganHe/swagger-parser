@@ -119,8 +119,8 @@ export class Operation {
     // api 调用
     apiRows.push(...doc.toDocLines())
     if (hasOptions) {
-      if (inParamName === 'params') {
-        apiRows.push(`export const ${id} = base.createRequest<${tag}.${id}.Options, ${tag}.${id}.Returns['data']>(s + '${id}', ({ ${pathParameterNames.length > 0 ? pathParameterNames.join(', ') + ', ' : ''}...params}) => ({${setting} }))`)
+      if (pathParameterNames.length > 0) {
+        apiRows.push(`export const ${id} = base.createRequest<${tag}.${id}.Options, ${tag}.${id}.Returns['data']>(s + '${id}', ({ ${pathParameterNames.join(', ') + ', '}...${inParamName}}) => ({${setting} }))`)
       } else {
         apiRows.push(`export const ${id} = base.createRequest<${tag}.${id}.Options, ${tag}.${id}.Returns['data']>(s + '${id}', (${inParamName}) => ({${setting} }))`)
       }

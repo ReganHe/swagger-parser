@@ -4,7 +4,7 @@ module.exports = [
     type: 'fe',
     language: 'ts',
     outputDir: './auto',
-    json: './swagger.json',
+    json: 'http://192.168.3.102:34280/v3/api-docs',
     showUpdateLog: true,
     tagNameMap: (name) => {
       const TAG_MAP = {
