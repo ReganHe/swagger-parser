@@ -4,7 +4,8 @@ module.exports = [
     type: 'fe',
     language: 'ts',
     outputDir: './auto',
-    json: 'http://192.168.3.102:34280/v3/api-docs',
+    // json: 'http://192.168.3.102:34280/v3/api-docs',
+    json:'./swagger.json',
     showUpdateLog: true,
     tagNameMap: (name) => {
       const TAG_MAP = {
@@ -45,6 +46,11 @@ module.exports = [
         资质证书管理: 'Certificate',
         字典服务: 'Dict',
         组织机构管理服务: 'Gisc',
+        交接班服务: 'Sg',
+        车辆信息管理: 'VehicleManage',
+        LNG加气站卸车记录服务: 'Lu',
+        加液及充装检查记录: 'Cf',
+        进销存服务: 'Sale',
       };
       return TAG_MAP[name];
     },

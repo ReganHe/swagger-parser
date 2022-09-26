@@ -330,15 +330,19 @@ function getSchemaObjectType(schema: swagger3.OpenAPIObject, obj: swagger3.Schem
     eachObject(mergedObj.properties || {}, (propKey, propValue: any) => {
       // console.log('propValue', propValue);
       // console.log('refArrayNames', refArrayNames);
-      if (propValue.type === 'array' && propValue.items && propValue.items['$ref'] && refArrayNames.includes(propValue.items['$ref'])) {
+      if (propValue.type === 'array' && propValue.items && propValue.items['$ref'] && refArrayNames.includes(`${propKey}-${propValue.items['$ref']}`)) {
       } else {
         if (propValue.type === 'array' && propValue.items && propValue.items['$ref']) {
-          refArrayNames.push(propValue.items['$ref']);
+          refArrayNames.push(`${propKey}-${propValue.items['$ref']}`);
         }
         const def = new Definition(propKey, getSchemaObjectType(schema, propValue, defaultRequired, refArrayNames))
         parse2definition(propValue, def)
-        if (typeof defaultRequired === 'boolean') def.required = defaultRequired
-        else def.required = required.includes(propKey)
+        if (typeof defaultRequired === 'boolean') {
+          def.required = defaultRequired
+        } 
+        else {
+          def.required = required.includes(propKey)
+        } 
 
         defs.push(def)
       }
