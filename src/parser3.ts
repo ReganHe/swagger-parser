@@ -145,8 +145,8 @@ export function parser3(schema: swagger3.OpenAPIObject, options: parser3.Options
           if (!newname) return
           if (typeof newname === 'string') apiName = newname
         }
-
-        apiName = apiName.replace(/_\d+$/, `_${tagName}`)
+        apiName = apiName.replace(/_\d+$/, '')
+        // apiName = `${apiName}_${tagName}`
         apiName = camelCase(apiName)
 
         let tagOperations = getObjectValue(tags, tagName)
@@ -339,10 +339,10 @@ function getSchemaObjectType(schema: swagger3.OpenAPIObject, obj: swagger3.Schem
         parse2definition(propValue, def)
         if (typeof defaultRequired === 'boolean') {
           def.required = defaultRequired
-        } 
+        }
         else {
           def.required = required.includes(propKey)
-        } 
+        }
 
         defs.push(def)
       }
