@@ -1,15 +1,13 @@
 import * as warn from 'mora-scripts/libs/sys/warn'
 
-import {FORMAT} from '../config'
-import {mock} from '../services/mock'
-import {Mock} from '../services/types'
-import {Definition} from './Definition'
-import {Desc} from './Desc'
-import {Type, ObjectType} from './Type'
+import { FORMAT } from '../config'
+import { Definition } from './Definition'
+import { Desc } from './Desc'
+import { Type, ObjectType } from './Type'
 
-const {EOL, TAB} = FORMAT
+const { EOL } = FORMAT
 
-class LocateError extends Error {}
+class LocateError extends Error { }
 
 export namespace Operation {
   export interface OperationObject {
@@ -28,7 +26,7 @@ export namespace Operation {
     /** 如果 path 中有参数，会使用 {} 包裹 */
     path: string
     /** 参数，分不同的地方，可以存在 query/header/path/formData/cookie/body 中 */
-    parameters: ParameterObject[]
+    parameters: ParameterObject[],
     /** 返回的类型 */
     returns: Type
   }
@@ -78,73 +76,67 @@ export class Operation {
     return type
   }
 
-  toBase(config: {baseMethod?: string, language?: string, docPrefix?: string}) {
-    const {id, tag, parameters, desc, method, path} = this.opt
+  toBase(config: { baseMethod?: string, language?: string, docPrefix?: string }) {
+    const { id, tag, parameters, desc, method, path } = this.opt
     const hasOptions = parameters.length
 
     // 获取配置
-    const settingRows = [`path: '${path.replace(/{(\w+)}/g, ':$1')}'`]
-    if (method !== config.baseMethod) settingRows.push(`method: '${method}'`)
-    if (parameters.find(p => p.in === 'formData')) settingRows.push(`http: {headers: {'Content-Type': 'application/x-www-form-urlencoded'}}`)
-    parameters.forEach(p => {
-      if (Type.isObjectType(p.type) && p.type.definitions.length) {
-        let str = p.type.definitions.map(d => d.name).join('&')
-        if (p.in === 'formData' || p.in === 'body') settingRows.push(`body: '${str}'`)
-        else if (p.in === 'header') settingRows.push(`header: '${str}'`)
-        else if (p.in === 'query') settingRows.push(`query: '${str}'`)
-      }
-    })
+    const settingRows = [`url: \`${path.replace(/{(\w+)}/g, '${$1}')}\``]
+    settingRows.push(`method: '${method}'`)
+    if (parameters.find(p => p.in === 'formData')) {
+      settingRows.push(`headers: {'Content-Type': 'application/x-www-form-urlencoded'}`)
+    }
+    const inParamName = ['GET', 'DELETE'].includes(method) ? 'params' : 'data'
+    if (hasOptions) {
+      settingRows.push(inParamName)
+    }
+
+    const pathParameterNames: string[] = [];
+    if (parameters.some(p => p.in === 'path')) {
+      parameters.filter(r => r.in === 'path').forEach(r => {
+        ((r.type as any).definitions || []).forEach((t: { name: string }) => {
+          if (t.name) {
+            if (!pathParameterNames.includes(t.name)) {
+              pathParameterNames.push(t.name);
+            }
+          }
+        })
+      })
+    }
+
     const setting = settingRows.join(', ')
     const apiRows: string[] = []
 
-    let {opt} = this
+    let { opt } = this
     let doc = new Desc()
     doc.push(desc)
-    doc.push(`${EOL}**TAG:** ${opt.rawTag}； &nbsp;&nbsp; **PATH:** ${opt.path}；`)
+    doc.push(`**TAG:** ${opt.rawTag}； &nbsp;&nbsp; **PATH:** ${opt.path}；`)
 
     if (config.docPrefix) {
       doc.push(`@see [线上文档](${config.docPrefix}/${this.opt.rawTag}/${this.opt.rawId})`)
     }
 
     // api 调用
-    if (config.language === 'js') {
-      let ns = `@type {import("@mora/foe-api").Application.ApiReturnsWithData<import("./modal").${tag}.${id}.O, import("./modal").${tag}.${id}.R, api.FilterMock<import("./modal").${tag}.${id}.R>>}`
-      doc.push(ns)
-      apiRows.push(...doc.toDocLines())
-      apiRows.push(`export const ${id} = api(s + '${id}', {${setting}})`)
-    } else {
-      let nsOpt = hasOptions ? ` export type O = ${tag}.${id}.O;` : ''
-      let ns = `export namespace ${id} {${nsOpt} export type R = ${tag}.${id}.R }`
-      apiRows.push(ns, ...doc.toDocLines())
-      if (hasOptions) {
-        apiRows.push(`export const ${id} = api<${id}.O, ${id}.R>(s + '${id}', {${setting}})`)
+    apiRows.push(...doc.toDocLines())
+    if (hasOptions) {
+      if (pathParameterNames.length > 0) {
+        apiRows.push(`export const ${id} = base.createRequest<${tag}.${id}.Options, ${tag}.${id}.Returns['data']>(s + '${id}', ({ ${pathParameterNames.join(', ') + ', '}...${inParamName}}) => ({${setting} }))`)
       } else {
-        apiRows.push(`export const ${id} = api<${id}.R>(s + '${id}', {${setting}})`)
+        apiRows.push(`export const ${id} = base.createRequest<${tag}.${id}.Options, ${tag}.${id}.Returns['data']>(s + '${id}', (${inParamName}) => ({${setting} }))`)
       }
+
+    } else {
+      apiRows.push(`export const ${id} = base.createNoParamsRequest<${tag}.${id}.Returns['data']>(s + '${id}', () => ({${setting} }))`)
     }
 
     return apiRows.join(EOL)
-  }
-
-  toMock(setting: Mock = {}) {
-    const {returns, id} = this.opt
-    let mockStr = mock(setting, returns, this)
-    if (!mockStr) return ''
-
-    mockStr = mockStr.replace(/\r?\n/g, EOL + TAB) // 换行后面加个 TAB
-    mockStr = `${id}.mock('自动生成', () => {${EOL}${TAB}return ${mockStr}${EOL}})`
-    return [
-      `if (__DEV__) {`,
-      ...mockStr.split(/\r?\n/).map(r => TAB + r),
-      '}'
-    ].join(EOL)
   }
 
   /**
    * modal 是给 foeApi 和 nodeApi 的 ts 定义
    */
   toModal() {
-    const {parameters, returns} = this.opt
+    const { parameters, returns } = this.opt
     const modal: string[] = []
 
     /**
@@ -153,7 +145,8 @@ export class Operation {
     if (parameters.length) {
       const paramType = this.mergeParameters()
       paramType.toTS('Options', modal)
-      modal.push(`export interface O extends api.FilterRequest<Options> {}`)
+      // modal.push(`export interface O extends Options {}`)
+      modal.push(`export type O = Options;`)
     }
 
     /**
@@ -165,12 +158,12 @@ export class Operation {
       modal.push(`export type Returns = ${returns.toString()}`)
     }
 
-    // 对象可以继承，非对象不能继承
-    if (Type.isObjectType(returns)) {
-      modal.push(`export interface R extends api.FilterResponse<Returns> {}`)
-    } else {
-      modal.push(`export type R = api.FilterResponse<Returns>`)
-    }
+    // // 对象可以继承，非对象不能继承
+    // if (Type.isObjectType(returns)) {
+    //   modal.push(`export interface R extends Returns {}`)
+    // } else {
+    modal.push(`export type R = Returns['data'];`)
+    // }
 
     return modal.join(EOL)
   }
@@ -186,7 +179,7 @@ export class Operation {
     }
 
     for (let i = 0; i < parts.length; i++) {
-      let {key, indexes} = parts[i]
+      let { key, indexes } = parts[i]
       for (let index = 0; index < indexes.length; index++) {
         if (Type.isArrayType(type)) {
           type = type.type
@@ -276,7 +269,7 @@ export class Operation {
    * - 'arr[][].code' 忽略数组 arr 中所有数组中的每一项的 code 字段
    */
   pickResponse(targetPath: string, ignoreWarn = false) {
-    let {returns} = this.opt
+    let { returns } = this.opt
     let type = this.__operateSubTypeByPath(ignoreWarn, returns, targetPath)
     type.desc = returns.desc
     this.opt.returns = type
@@ -285,7 +278,7 @@ export class Operation {
 }
 
 function parseTargetPath(targetPath: string) {
-  const res: Array<{indexes: number[], key: string}> = []
+  const res: Array<{ indexes: number[], key: string }> = []
   const regWithKey = /^(\w+)\[\s*(\d*)\s*\](.*)$/
   const regWithoutKey = /^\[\s*(\d*)\s*\](.*)$/
   const toIndex = (s: string) => s ? parseInt(s, 10) : -1
@@ -293,7 +286,7 @@ function parseTargetPath(targetPath: string) {
   let indexes: number[] = []
   targetPath.split('.').forEach(key => {
     if (regWithKey.test(key)) {
-      res.push({key: RegExp.$1, indexes})
+      res.push({ key: RegExp.$1, indexes })
       indexes = []
       indexes.push(toIndex(RegExp.$2))
       key = RegExp.$3
@@ -301,7 +294,7 @@ function parseTargetPath(targetPath: string) {
       indexes.push(toIndex(RegExp.$1))
       key = RegExp.$2
     } else {
-      res.push({key, indexes})
+      res.push({ key, indexes })
       indexes = []
       key = ''
     }
