@@ -1,100 +1,72 @@
-// @ts-check
-
-/**
- * @type import('../services/').Config[]
- */
-const configs = [
+module.exports = [
   {
-    name: 'petstore',
+    name: 'portEnergy',
     type: 'fe',
     language: 'ts',
-    // json: "http://192.168.35.74:9560/v2/api-docs",
-    json: '../../example-json/petstore.json',
-    docPrefix: 'https://petstore.swagger.io/#',
+    outputDir: './auto',
+    // json: 'http://192.168.3.102:34280/v3/api-docs',
+    json:'./swagger.json',
     showUpdateLog: true,
-    // tagNameMap: (name) => {
-    //   return name === 'pet'
-    // },
-    // apiNameMap: (name) => {
-    //   return name.startsWith('addPet')
-    //   // return name.startsWith('getPet') || name.startsWith('findPet')
-    // },
-    mock: {
-      config: {
-        repeats: {min: 2, max: 5}
-      },
-      examples: [
-        {
-          match: 'category.name@Pet',
-          value: ['Pet种类 1', 'Pet种类 2', 'Pet种类 3']
-        },
-        {
-          exect: true,
-          match: '^nam@Pet',
-          value: (op, keys) => {
-            return '猫' + Math.random().toFixed(16).substr(-3)
-          }
-        }
-      ],
-      generator(op, keys, mock) {
-        // keys 长度为 0 表示最外层的数据
-        if (op.key === 'Pet.getPetById' && keys.length === 0) {
-          mock.tags.length = 1
-        }
-        return mock
-      }
-    }
-  },
-  {
-    name: 'credit',
-    type: 'fe',
-    disabled: true,
-    json: '../../example-json/credit.json',
-    operationMap(api) {
-      api.omitParameter('body', 'userId', true)
-        .omitResponse('escapeCode', true)
-        .omitResponse('escapeMessage', true)
+    tagNameMap: (name) => {
+      const TAG_MAP = {
+        '01.账号预登录服务': 'GwsToken',
+        '02.账号服务': 'GwsAccount',
+        '03.个人信息': 'GwsUserInfo',
+        '04.应用管理服务': 'GwsApplication',
+        '05.菜单管理服务': 'GwsMenu',
+        '06.功能点管理服务': 'GwsPermission',
+        '07.角色管理服务': 'GwsRole',
+        '08.数据接口管理服务': 'GwsApi',
+        '09.平台管理员管理服务': 'GwsPlatformAdmin',
+        '10.应用管理员管理服务': 'GwsApplicationAdmin',
+        '11.应用与应用管理员关联配置服务': 'GwsRefApp',
+        '12.设备管理服务': 'GwsDevice',
+        '12.应用用户管理服务': 'GwsUser',
+        安全检测计划表服务: 'Sp',
+        安全检测计划文件服务: 'Spf',
+        安全检查服务: 'Sc',
+        安全学习培训服务: 'SafetyTraining',
+        常规设备服务: 'Device',
+        常规物资台帐服务: 'Gsb',
+        '厂家/单位服务': 'Mu',
+        多媒体服务: 'Img',
+        附件服务: 'Attachment',
+        机构管理: 'Org',
+        日志服务: 'Operation',
+        特种设备检查服务: 'Sec',
+        维修报告服务: 'Wo',
+        压力管道服务: 'Pip',
+        压力容器服务: 'Pv',
+        用户管理服务: 'User',
+        用气监控服务: 'Gas',
+        站点管理服务: 'Org',
+        站内信服务: 'Message',
+        中修工单服务: 'Mro',
+        中修计划服务: 'Mrp',
+        资质证书管理: 'Certificate',
+        字典服务: 'Dict',
+        组织机构管理服务: 'Gisc',
+        交接班服务: 'Sg',
+        车辆信息管理: 'VehicleManage',
+        LNG加气站卸车记录服务: 'Lu',
+        加液及充装检查记录: 'Cf',
+        进销存服务: 'Sale',
+      };
+      return TAG_MAP[name];
     },
-    mock: {
-      config: {
-        timeFormat: (timestamp) => new Date(timestamp).toISOString()
-      },
-
-      examples: [
-        {match: 'cvv2',           value: '123'},
-        {match: 'productCode',    value: ['CREDIT_INSTALMENT']},
-        {match: 'merchantCode',   value: ['hj']},
-        {match: 'bankAcronym',    value: ['ABC', 'BCOM', 'BOC', 'CCB']},
-        {match: 'supportedTerms', value: [[3, 6], [3, 6, 9], [3, 6, 9, 12]]},
-        {match: 'term | terms',   value: [3, 6, 9, 12]},
-        {match: 'validThru',      value: '{@Date("MMDD", 10)}'}
-      ],
-    }
+    API_MAP: function (apiName) {
+      return apiName;
+    },
   },
-  {
-    name: 'instal',
-    json: '../../example-json/instal.json',
-    disableMock: true,
-    disabled: true,
-    operationMap(api) {
-      api.omitParameter('body', 'userId', true)
-        .omitResponse('respMsg', true)
-        .omitResponse('respCode', true)
-        .omitResponse('respErrorData', true)
-    }
-  },
-  {
-    name: 'daybreak',
-    disabled: true,
-    type: 'fe',
-    json: '../../example-json/daybreak.json',
-    operationMap(api) {
-      api.omitParameter('body', 'userId', true)
-        .omitResponse('resultCode', true)
-        .omitResponse('resultMessage', true)
-        .omitResponse('respErrorData', true)
-    }
-  },
-]
-
-module.exports = configs
+  // {
+  //   "outputDir": "src/api/common",
+  //   "json": "http://192.168.38.195:9516/rest/swagger.json",
+  //   "TAG_MAP": {
+  //     "图形验证码服务": "captcha",
+  //     "登陆注册服务": "login"
+  //   },
+  //   "API_MAP": function(apiName) {
+  //     return apiName
+  //   }
+  // },
+];

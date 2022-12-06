@@ -80,7 +80,7 @@ export class ObjectType extends Type {
         typeName = d.type.toString()
       }
 
-      rows.push(`${TAB}${d.name}${d.required ? '' : '?'}: ${typeName}`)
+      rows.push(`${TAB}${d.name}${d.required ? '' : '?'}: ${typeName};`)
     })
     rows.push(`}`)
 
@@ -104,7 +104,7 @@ export class ArrayType extends Type {
       subTypeName = this.type.toString()
     }
 
-    rows.push(`export type ${name} = ${subTypeName}[]`)
+    rows.push(`export type ${name} = ${subTypeName}[];`)
     container.push(...rows)
 
     return container
