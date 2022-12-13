@@ -15,7 +15,7 @@ process.on('uncaughtException', handle)
 
 cli({
   usage: 'swagger-parser [options]',
-  version: '3.1.14',
+  version: '3.1.15',
 }).options({
   'name | n':   '<array>    重新生成指定名称的 swagger，同时可以指定 tagName 和 apiName\n如：“ --name petstore.Pet.findPetById ” 表示重新生成 findPetById\n注意：tagName 前面没有 Api 前缀',
   'force | f':  '<boolean>  强制重新生成指定的文件，并且会将 manual 的配置更新为 auto',

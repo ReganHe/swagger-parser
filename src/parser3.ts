@@ -290,7 +290,7 @@ function parseRequestBody(schema: swagger3.OpenAPIObject, requestBody: swagger3.
     formData: []
   }
   const requestBodyObject = requestBody as swagger3.RequestBodyObject;
-  const mediaTypeObject = (requestBodyObject.content['application/json'] || requestBodyObject.content['multipart/form-data']) as swagger3.MediaTypeObject;
+  const mediaTypeObject = (requestBodyObject.content['application/json'] || requestBodyObject.content['multipart/form-data'] || requestBodyObject.content['application/x-www-form-urlencoded']) as swagger3.MediaTypeObject;
   const requestObj = mediaTypeObject.schema as swagger3.SchemaObject | swagger3.ReferenceObject;
   const type = getSchemaObjectType(schema, requestObj);
   const found = res.find(r => r.in === 'body')
