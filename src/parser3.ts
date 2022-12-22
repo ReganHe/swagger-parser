@@ -73,7 +73,10 @@ export namespace parser3 {
     operationMap?: (operation: Operation, tagName: string, apiName: string) => void
 
     /** 是否输出 parse 的日志 */
-    showParseLog?: boolean
+    showParseLog?: boolean,
+
+    /** URL黑名单 */
+    blackUrls?: string[]
   }
 
   export namespace Returns {
@@ -100,6 +103,12 @@ export function parser3(schema: swagger3.OpenAPIObject, options: parser3.Options
 
   // 遍历所有 path
   eachObject(schema.paths, (pathKey, pathObj: swagger3.PathItemObject) => {
+    // URL黑名单处理
+    if (options.blackUrls && options.blackUrls.includes(pathKey)) {
+      console.log('path in blackUrls', pathKey);
+      return;
+    }
+
     const { $ref, parameters, ...restPathObj } = pathObj
 
     // 遍历所有 operation (即 get/post/delete 这种 http method)
