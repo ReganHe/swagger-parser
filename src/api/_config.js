@@ -4,9 +4,9 @@ module.exports = [
     type: 'fe',
     language: 'ts',
     outputDir: './auto',
-    // json: 'http://192.168.3.102:34280/v3/api-docs',
-    json:'./swagger.json',
+    json: 'http://pes.app.polarwin.cc:9080/v3/api-docs',
     showUpdateLog: true,
+    blackUrls: ['/gisc/dict/value/get_list_bytypekey'],
     tagNameMap: (name) => {
       const TAG_MAP = {
         '01.账号预登录服务': 'GwsToken',
@@ -51,6 +51,9 @@ module.exports = [
         LNG加气站卸车记录服务: 'Lu',
         加液及充装检查记录: 'Cf',
         进销存服务: 'Sale',
+        首页服务: 'Home',
+        销售数据服务: 'SalesData',
+        进销存报表服务: 'Report',
       };
       return TAG_MAP[name];
     },
