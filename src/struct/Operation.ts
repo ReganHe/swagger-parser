@@ -131,22 +131,42 @@ export class Operation {
 
     // api 调用
     apiRows.push(...doc.toDocLines());
-    if (hasOptions) {
-      if (pathParameterNames.length > 0) {
-        apiRows.push(
-          `export const ${id} = base.createRequest<${tag}.${id}.Options, ${tag}.${id}.Returns['data']>(s + '${id}', ({ ${
-            pathParameterNames.join(', ') + ', '
-          }...${inParamName}}) => ({${setting} }))`
-        );
+    if (method === 'GET' && this.opt.returns.name === 'any') {
+      if (hasOptions) {
+        if (pathParameterNames.length > 0) {
+          apiRows.push(
+            `export const ${id} = base.createBlobRequest<${tag}.${id}.Options>(s + '${id}', ({ ${
+              pathParameterNames.join(', ') + ', '
+            }...${inParamName}}) => ({${setting} }))`
+          );
+        } else {
+          apiRows.push(
+            `export const ${id} = base.createBlobRequest<${tag}.${id}.Options>(s + '${id}', (${inParamName}) => ({${setting} }))`
+          );
+        }
       } else {
         apiRows.push(
-          `export const ${id} = base.createRequest<${tag}.${id}.Options, ${tag}.${id}.Returns['data']>(s + '${id}', (${inParamName}) => ({${setting} }))`
+          `export const ${id} = base.createNoParamsBlobRequest(s + '${id}', () => ({${setting} }))`
         );
       }
     } else {
-      apiRows.push(
-        `export const ${id} = base.createNoParamsRequest<${tag}.${id}.Returns['data']>(s + '${id}', () => ({${setting} }))`
-      );
+      if (hasOptions) {
+        if (pathParameterNames.length > 0) {
+          apiRows.push(
+            `export const ${id} = base.createRequest<${tag}.${id}.Options, ${tag}.${id}.Returns['data']>(s + '${id}', ({ ${
+              pathParameterNames.join(', ') + ', '
+            }...${inParamName}}) => ({${setting} }))`
+          );
+        } else {
+          apiRows.push(
+            `export const ${id} = base.createRequest<${tag}.${id}.Options, ${tag}.${id}.Returns['data']>(s + '${id}', (${inParamName}) => ({${setting} }))`
+          );
+        }
+      } else {
+        apiRows.push(
+          `export const ${id} = base.createNoParamsRequest<${tag}.${id}.Returns['data']>(s + '${id}', () => ({${setting} }))`
+        );
+      }
     }
 
     return apiRows.join(EOL);
