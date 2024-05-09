@@ -19,10 +19,21 @@ export function lookupRootDir(fromDir?: string) {
  * 获取固定目录下的配置文件
  */
 export function getConfig() {
-  const root = lookupRootDir()
-  const relativePath = path.join('src', 'api', '_config.js')
-  const filePath = path.join(root, relativePath)
-  if (!fs.existsSync(filePath)) throw new Error(`配置文件 ${relativePath} 不存在`)
+  const root = lookupRootDir();
+  const cjsRelativePath = path.join('src', 'api', '_config.cjs');
+  const jsRelativePath = path.join('src', 'api', '_config.js');
+  const cjsFilePath = path.join(root, cjsRelativePath);
+  const jsFilePath = path.join(root, jsRelativePath);
+  let filePath = '';
+  if (fs.existsSync(cjsFilePath)) {
+    filePath = cjsFilePath;
+  } else if (fs.existsSync(jsFilePath)) {
+    filePath = jsFilePath;
+  }
+
+  if (!filePath) {
+    throw new Error(`配置文件 ${jsRelativePath}、${cjsRelativePath} 不存在`);
+  }
 
   const configs: ParsedConfig[] = [].concat(require(filePath))
 
